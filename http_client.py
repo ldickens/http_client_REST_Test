@@ -1,22 +1,9 @@
 import http.client, threading, time
 from sys import argv
 
-#threaded loop to send 
-def loadMixPreset(mixes, timeout, stop):
-    conn = http.client.HTTPConnection('127.0.0.1:40512')
-    while True:
-        # load in a preset for each layer on each mix
-        for mix in range(1, mixes + 1):
-            conn.request("GET", f"/mix/{mix}/preset/1")
-            r1 = conn.getresponse()
-            print(f'Mix: {mix} preset: 1 - {r1.status}, {r1.reason}')
-            r1.read()
-            if stop():
-                print("Exiting Loop")
-                break
-            time.sleep(timeout)
-        
-        # load in a reset preset
+conn = http.client.HTTPConnection('127.0.0.1:40512')
+
+def resetMixPreset(mixes, timeout, stop):
         for mix in range(1, mixes + 1):
             conn.request("GET", f"/mix/{mix}/preset/2")
             r1 = conn.getresponse()
@@ -27,8 +14,26 @@ def loadMixPreset(mixes, timeout, stop):
                 break
             time.sleep(timeout)
 
-def loadLayerPreset(mixes, timeout, stop):
-    conn = http.client.HTTPConnection('127.0.0.1:40512')
+def loadMixPreset(mixes, timeout, stop, once):
+    while True:
+        # load in a preset for each layer on each mix
+        for mix in range(1, mixes + 1):
+            conn.request("GET", f"/mix/{mix}/preset/10")
+            r1 = conn.getresponse()
+            print(f'Mix: {mix} preset: 1 - {r1.status}, {r1.reason}')
+            r1.read()
+            if stop():
+                print("Exiting Loop")
+                break
+            time.sleep(timeout)
+        
+        # load in a reset preset
+        resetMixPreset(mixes, timeout, stop)
+
+        if once == True:
+            break
+
+def loadLayerPreset(mixes, timeout, stop, once):
     while True:
         # load in a preset for each layer on each mix
         for mix in range(1, mixes + 1):
@@ -42,18 +47,23 @@ def loadLayerPreset(mixes, timeout, stop):
                     break
                 time.sleep(timeout)
         
-            # load in a reset preset
+        # load in a preset for each layer on each mix
         for mix in range(1, mixes + 1):
-            for layer in range(1, 5):
-                # preset [0,5] is the reset layer
-                conn.request("GET", f"/mix/{mix}/layer/{layer}/preset/5")
+            for i, layer in enumerate(range(1, 5)):
+                conn.request("GET", f"/mix/{mix}/layer/{layer}/preset/{i+6}")
                 r1 = conn.getresponse()
-                print(f'Mix: {mix} Layer: {layer} preset: 5 - {r1.status}, {r1.reason}')
+                print(f'Mix: {mix} Layer: {layer} preset: {i+1} - {r1.status}, {r1.reason}')
                 r1.read()
                 if stop():
                     print("Exiting Loop")
                     break
                 time.sleep(timeout)
+
+            # load in a reset preset
+        resetMixPreset(mixes, timeout, stop)
+
+        if once == True:
+            break
 
 def options():
     print(
@@ -130,7 +140,7 @@ def parse_arguments():
             arg[1] should equal -t
             arg[2] should equal number of mixes (int) 
             arg[3] should equal wait time in seconds between requests (float)
-            arg[4] choose the test you would like to run mix or layer (string)''')
+            arg[4] choose the test you would like to run mix or layer (string) (mixes / layer)''')
         quit()
     else:
         if argv[2]:
@@ -139,21 +149,28 @@ def parse_arguments():
             timeout = float(argv[3])    
         if argv[4]:
             test = str(argv[4])    
-        return mixes, timeout, test
+        if argv[5]:
+            once = str(argv[5])    
+            if once == 'once':
+                once = True
+            elif once == 'loop':
+                once = False
+        return mixes, timeout, test, once
 
-def launch_test(test, mixes, timeout):
+# start threaded task
+def launch_test(test, mixes, timeout, once):
     stop_threads = False
 
     if test == 'mixes':
         thread = threading.Thread(
             target=loadMixPreset,
-            args=(mixes, timeout, lambda: stop_threads),
+            args=(mixes, timeout, lambda: stop_threads, once),
             daemon=True)
 
     if test == 'layers':
         thread = threading.Thread(
             target=loadLayerPreset,
-            args=(mixes, timeout, lambda: stop_threads),
+            args=(mixes, timeout, lambda: stop_threads, once),
             daemon=True)
     return thread
 
@@ -165,13 +182,13 @@ def main():
         timeout = None
         test = None
         if len(argv) > 1:
-            mixes, timeout, test = parse_arguments()
+            mixes, timeout, test, once = parse_arguments()
         else:
             options()
             mixes, timeout, test = stdinput()
         
         # start threaded task via launch test option parsing
-        thread = launch_test(test, mixes, timeout)
+        thread = launch_test(test, mixes, timeout, once)
         thread.start()
     
         close = False
