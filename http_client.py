@@ -66,35 +66,35 @@ def loadLayerPreset(mixes, timeout, stop, once):
             break
 
 def loadLayerClip(mixes, timeout, stop, once):
+    # "name": "Da-Lite Best Sellers_ Products"
     media1 = "e8039748-a47e-4463-91d7-ba82638f49b3:4A70CEE495C13776154B5AE054836A5D"
+    # "name": "Yamaha CS-500 and CS-800"
     media2 = "affba559-b727-42d4-ad43-8254b65e2ef0:4B6D372CC49D8212EE42D714693EE4DE"
     while True:
         # load in a preset for each layer on each mix
         for mix in range(1, mixes + 1):
-            for i, layer in enumerate(range(1, 5)):
-                conn.request("GET", f"/mix/{mix}/layer/{layer}/media/{media1}")
-                r1 = conn.getresponse()
-                print(f'Mix: {mix} Layer: {layer}: Loading Media: {me} - {r1.status}, {r1.reason}')
-                r1.read()
-                if stop():
-                    print("Exiting Loop")
-                    break
-                time.sleep(timeout)
+            conn.request("GET", f"/mix/{mix}/layer/{1}/media/{media1}")
+            r1 = conn.getresponse()
+            print(f'Mix: {mix} Layer: {1}: Loading Media: {media1} - {r1.status}, {r1.reason}')
+            r1.read()
+            if stop():
+                print("Exiting Loop")
+                break
+            time.sleep(timeout)
         
         if once == True:
             break
 
         # load in a preset for each layer on each mix
         for mix in range(1, mixes + 1):
-            for i, layer in enumerate(range(1, 5)):
-                conn.request("GET", f"/mix/{mix}/layer/{layer}/media/{media2}")
-                r1 = conn.getresponse()
-                print(f'Mix: {mix} Layer: {layer} preset: {i+1} - {r1.status}, {r1.reason}')
-                r1.read()
-                if stop():
-                    print("Exiting Loop")
-                    break
-                time.sleep(timeout)
+            conn.request("GET", f"/mix/{mix}/layer/{1}/media/{media2}")
+            r1 = conn.getresponse()
+            print(f'Mix: {mix} Layer: {1} Loading Media: {media2} - {r1.status}, {r1.reason}')
+            r1.read()
+            if stop():
+                print("Exiting Loop")
+                break
+            time.sleep(timeout)
 
 
 def options():
@@ -172,7 +172,8 @@ def parse_arguments():
             arg[1] should equal -t
             arg[2] should equal number of mixes (int) 
             arg[3] should equal wait time in seconds between requests (float)
-            arg[4] choose the test you would like to run (mix, layer or media) (string) (mixes / layer / media)''')
+            arg[4] choose the test you would like to run [string] (mixes / layer / media)
+            arg[5] once or looping test [string] (once / loop)''')
         quit()
     else:
         if argv[2]:
