@@ -66,8 +66,8 @@ def loadLayerPreset(mixes, timeout, stop, once):
             break
 
 def loadLayerClip(mixes, timeout, stop, once):
-    media1 = "7e44e1f2-6a1e-4c15-b22a-97ac46fdc3c5:02B58422E650BB35E5CCBAE462E839CF"
-    media2 = "a800509b-e943-4e83-977b-2560b141f6fb:09FF64404ADB7F973824BA4B0045A148"
+    media1 = "e8039748-a47e-4463-91d7-ba82638f49b3:4A70CEE495C13776154B5AE054836A5D"
+    media2 = "affba559-b727-42d4-ad43-8254b65e2ef0:4B6D372CC49D8212EE42D714693EE4DE"
     while True:
         # load in a preset for each layer on each mix
         for mix in range(1, mixes + 1):
