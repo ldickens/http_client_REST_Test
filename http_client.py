@@ -66,8 +66,8 @@ def loadLayerPreset(mixes, timeout, stop, once):
             break
 
 def loadLayerClip(mixes, timeout, stop, once):
-    # "name": "Da-Lite Best Sellers_ Products"
-    media1 = "e8039748-a47e-4463-91d7-ba82638f49b3:4A70CEE495C13776154B5AE054836A5D"
+    # "name": "Gold Line Video"
+    media1 = "4912194d-d38f-42f8-a6f0-b65f1d094974:A4047F1512780ACB6BE3EB88EB644142"
     # "name": "Yamaha CS-500 and CS-800"
     media2 = "affba559-b727-42d4-ad43-8254b65e2ef0:4B6D372CC49D8212EE42D714693EE4DE"
     while True:
@@ -195,24 +195,16 @@ def launch_test(test, mixes, timeout, once):
     stop_threads = False
 
     if test == 'mixes':
-        thread = threading.Thread(
-            target=loadMixPreset,
-            args=(mixes, timeout, lambda: stop_threads, once),
-            daemon=True)
-
+        func = loadMixPreset
     if test == 'layers':
-        thread = threading.Thread(
-            target=loadLayerPreset,
-            args=(mixes, timeout, lambda: stop_threads, once),
-            daemon=True)
-    
+        func = loadLayerPreset
     if test == 'media':
-        thread = threading.Thread(
-            target=loadLayerClip,
-            args=(mixes, timeout, lambda: stop_threads, once),
-            daemon=True)
+        func = loadLayerClip
+    thread = threading.Thread(
+        target=func,
+        args=(mixes, timeout, lambda: stop_threads, once),
+        daemon=True)
     return thread
-
 
 def main():
     if __name__ == "__main__":
