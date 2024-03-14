@@ -65,6 +65,38 @@ def loadLayerPreset(mixes, timeout, stop, once):
         if once == True:
             break
 
+def loadLayerClip(mixes, timeout, stop, once):
+    media1 = "7e44e1f2-6a1e-4c15-b22a-97ac46fdc3c5:02B58422E650BB35E5CCBAE462E839CF"
+    media2 = "a800509b-e943-4e83-977b-2560b141f6fb:09FF64404ADB7F973824BA4B0045A148"
+    while True:
+        # load in a preset for each layer on each mix
+        for mix in range(1, mixes + 1):
+            for i, layer in enumerate(range(1, 5)):
+                conn.request("GET", f"/mix/{mix}/layer/{layer}/media/{media1}")
+                r1 = conn.getresponse()
+                print(f'Mix: {mix} Layer: {layer}: Loading Media: {me} - {r1.status}, {r1.reason}')
+                r1.read()
+                if stop():
+                    print("Exiting Loop")
+                    break
+                time.sleep(timeout)
+        
+        if once == True:
+            break
+
+        # load in a preset for each layer on each mix
+        for mix in range(1, mixes + 1):
+            for i, layer in enumerate(range(1, 5)):
+                conn.request("GET", f"/mix/{mix}/layer/{layer}/media/{media2}")
+                r1 = conn.getresponse()
+                print(f'Mix: {mix} Layer: {layer} preset: {i+1} - {r1.status}, {r1.reason}')
+                r1.read()
+                if stop():
+                    print("Exiting Loop")
+                    break
+                time.sleep(timeout)
+
+
 def options():
     print(
         """
@@ -140,7 +172,7 @@ def parse_arguments():
             arg[1] should equal -t
             arg[2] should equal number of mixes (int) 
             arg[3] should equal wait time in seconds between requests (float)
-            arg[4] choose the test you would like to run mix or layer (string) (mixes / layer)''')
+            arg[4] choose the test you would like to run (mix, layer or media) (string) (mixes / layer / media)''')
         quit()
     else:
         if argv[2]:
@@ -170,6 +202,12 @@ def launch_test(test, mixes, timeout, once):
     if test == 'layers':
         thread = threading.Thread(
             target=loadLayerPreset,
+            args=(mixes, timeout, lambda: stop_threads, once),
+            daemon=True)
+    
+    if test == 'media':
+        thread = threading.Thread(
+            target=loadLayerClip,
             args=(mixes, timeout, lambda: stop_threads, once),
             daemon=True)
     return thread
