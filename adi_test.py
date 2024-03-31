@@ -38,3 +38,13 @@ class TestMedia():
         assert adi_core_networking.search_by_name(search, self.test_json['entries']) == None 
         captured = capsys.readouterr()  
         assert captured.out.strip() == 'File not found: FAILURE'
+
+    def test_search_by_id_success(self):
+        search = "668b2427-edde-494f-9c78-c7f9fb477cce:3E49D8FA732A94E27ABEEA5724316721"
+        result = adi_core_networking.search_by_id(search, self.test_json['entries'])
+        assert result['name'] == "9600x1920_Demo_Content_LEFT"
+
+    def test_search_by_id_failure(self):
+        search = "sdaojfhasi-edde-494f-9c78-c7f9fb477cce:3E49D8FA732A94E27ABEEA5724316721"
+        result = adi_core_networking.search_by_id(search, self.test_json['entries'])
+        assert result == None
